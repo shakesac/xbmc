@@ -1260,7 +1260,7 @@ class PrimeVideo(Singleton):
             except:
                 bCouldNotParse = True
             if bCouldNotParse or (not cnt):
-                self._g.dialog.notification(getString(30251), requestURL, xbmcgui.NOTIFICATION_ERROR)
+                self._g.dialog.notification(getString(30251), requestURL[:48], xbmcgui.NOTIFICATION_ERROR)
                 Log('Unable to fetch the url: {}'.format(requestURL), Log.ERROR)
                 continue
 
@@ -1375,7 +1375,6 @@ class PrimeVideo(Singleton):
                 if 'state' in cnt:
                     bSinglePage = True
                     bUpdatedVideoData |= ParseSinglePage(breadcrumb[-1], o, bCacheRefresh, data=cnt, url=requestURL)
-
                 # Pagination
                 if ('pagination' in cnt) or (key_exists(cnt, 'viewOutput', 'features', wl_lib, 'content', 'seeMoreHref')) or ('hasMoreItems' in cnt):
                     nextPage = None
@@ -1409,9 +1408,13 @@ class PrimeVideo(Singleton):
                             bAutoPaginate = not (p['all'] or p['search'])
                         elif 'Watchlist' == breadcrumb[1]:  # /root/watchlist/*
                             bAutoPaginate = not (p['all'] or p['watchlist'])
-                        # Always auto load category lists, then paginate if appropriate
-                        elif (2 < len(breadcrumb)) and (p['all'] or p['collections']):
+                        # Always auto load category lists for pv, on tld load only 2 pages, then paginate if appropriate
+                        elif (2 < len(breadcrumb) if self._g.UsePrimeVideo else pageNumber > 1) and (p['all'] or p['collections']):
                             bAutoPaginate = False
+                            if not self._g.UsePrimeVideo:
+                                try:
+                                    del(cnt['pagination']['page'])
+                                except KeyError: pass
 
                         if bAutoPaginate:
                             requestURLs.append(nextPage)
