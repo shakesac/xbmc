@@ -1058,6 +1058,9 @@ class PrimeVideo(Singleton):
             details = state['detail']
             if 'detail' in details:
                 details = details['detail']
+            # headerDetail contains sometimes gtis/asins, which are not included in details
+            if 'headerDetail' in state['detail']:
+                details.update(state['detail']['headerDetail'])
 
             # Get details, seasons first
             # WARNING: seasons may not have proper initialization at this stage
